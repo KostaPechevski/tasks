@@ -5,10 +5,17 @@
  */
 require('./bootstrap');
 import Vue from 'vue'
+import Tasks from './components/Tasks'
 import Login from './components/Login'
 import Logout from './components/Logout'
 
+import VueRouter from 'vue-router';
+import routes from './routes';
+
+Vue.use(VueRouter);
+
 const app = new Vue({
     el: '#app',
-    components: {Login, Logout}
+    router: new VueRouter(routes),
+    components: {Login, Tasks, Logout}
 });
