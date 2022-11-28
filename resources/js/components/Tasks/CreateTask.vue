@@ -3,7 +3,7 @@
         <h3 class="text-center">Create Task</h3>
         <div class="row">
             <div v-for="(errorArray, index) in errors" :key="index">
-                <span class="text-danger">{{ errorArray}} </span>
+                <span class="text-danger">{{ errorArray[0]}} </span>
             </div>
             <div class="col-md-6">
                 <form @submit.prevent="addTask">
@@ -62,7 +62,7 @@ export default {
                     this.$router.push({ name: 'all-tasks' })
                 ))
                 .catch(e => {
-                    this.errors = e.response.data
+                    this.errors = e.response.data.errors
                 })
         }
     }

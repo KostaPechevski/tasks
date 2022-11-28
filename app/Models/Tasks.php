@@ -11,7 +11,15 @@ class Tasks extends Model
 
     protected $guarded = [];
 
+    protected $appends = [
+        'editDate'
+    ];
+
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function geteditDateAttribute() {
+        return false;
     }
 }

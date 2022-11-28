@@ -5485,35 +5485,61 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       tasks: [],
-      editDate: false
+      editDateGlobal: null,
+      error: '',
+      success: ''
     };
   },
   created: function created() {
-    var _this = this;
-    axios.get('/api/tasks').then(function (response) {
-      _this.tasks = response.data;
-    });
+    this.getTasks();
+  },
+  watch: {
+    editDateGlobal: function editDateGlobal(newVal, oldVal) {
+      if (oldVal != null) {
+        this.tasks[oldVal].editDate = false;
+      }
+    }
   },
   methods: {
+    getTasks: function getTasks() {
+      var _this = this;
+      axios.get('/api/tasks').then(function (response) {
+        _this.tasks = response.data;
+      });
+    },
     updateTask: function updateTask(task_id, date) {
+      var _this2 = this;
       axios.patch("/api/tasks/".concat(task_id), {
         'expiration_date': date
       }).then(function (res) {
-        console.log(res);
+        if (res.data.status == 'error') {
+          _this2.error = res.data.message;
+          _this2.success = '';
+          _this2.tasks.forEach(function (task, index) {
+            if (task.id == task_id) {
+              task.editDate = true;
+            }
+          });
+        } else {
+          _this2.error = '';
+          _this2.success = res.data;
+        }
       });
     },
     deleteTask: function deleteTask(id) {
-      var _this2 = this;
+      var _this3 = this;
       axios["delete"]("/api/tasks/".concat(id)).then(function (response) {
-        var i = _this2.tasks.map(function (data) {
+        var i = _this3.tasks.map(function (data) {
           return data.id;
         }).indexOf(id);
-        _this2.tasks.splice(i, 1);
+        _this3.tasks.splice(i, 1);
       });
     }
   }
@@ -5602,7 +5628,7 @@ __webpack_require__.r(__webpack_exports__);
           name: 'all-tasks'
         });
       })["catch"](function (e) {
-        _this.errors = e.response.data;
+        _this.errors = e.response.data.errors;
       });
     }
   }
@@ -50562,7 +50588,7 @@ var render = function () {
       _vm._v(" "),
       _c(
         "tbody",
-        _vm._l(_vm.tasks, function (task) {
+        _vm._l(_vm.tasks, function (task, key) {
           return _c("tr", { key: task.id }, [
             _c("td", [_vm._v(_vm._s(task.id))]),
             _vm._v(" "),
@@ -50576,8 +50602,8 @@ var render = function () {
                     {
                       name: "show",
                       rawName: "v-show",
-                      value: !_vm.editDate,
-                      expression: "!editDate",
+                      value: !task.editDate,
+                      expression: "!task.editDate",
                     },
                   ],
                 },
@@ -50587,7 +50613,8 @@ var render = function () {
                     {
                       on: {
                         click: function ($event) {
-                          _vm.editDate = true
+                          task.editDate = true
+                          _vm.editDateGlobal = key
                         },
                       },
                     },
@@ -50601,8 +50628,8 @@ var render = function () {
                   {
                     name: "show",
                     rawName: "v-show",
-                    value: _vm.editDate == true,
-                    expression: "editDate == true",
+                    value: task.editDate == true,
+                    expression: "task.editDate == true",
                   },
                   {
                     name: "model",
@@ -50615,7 +50642,7 @@ var render = function () {
                 domProps: { value: task.expiration_data },
                 on: {
                   blur: function ($event) {
-                    _vm.editDate = false
+                    task.editDate = false
                     _vm.updateTask(task.id, task.expiration_data)
                   },
                   keyup: function ($event) {
@@ -50625,7 +50652,7 @@ var render = function () {
                     ) {
                       return null
                     }
-                    _vm.editDate = false
+                    task.editDate = false
                     _vm.updateTask(task.id, task.expiration_data)
                   },
                   input: function ($event) {
@@ -50668,6 +50695,14 @@ var render = function () {
         }),
         0
       ),
+    ]),
+    _vm._v(" "),
+    _c("span", { staticClass: "text-danger" }, [
+      _vm._v(_vm._s(_vm.error) + " "),
+    ]),
+    _vm._v(" "),
+    _c("span", { staticClass: "text-success" }, [
+      _vm._v(_vm._s(_vm.success) + " "),
     ]),
   ])
 }
@@ -50725,7 +50760,7 @@ var render = function () {
         _vm._l(_vm.errors, function (errorArray, index) {
           return _c("div", { key: index }, [
             _c("span", { staticClass: "text-danger" }, [
-              _vm._v(_vm._s(errorArray) + " "),
+              _vm._v(_vm._s(errorArray[0]) + " "),
             ]),
           ])
         }),

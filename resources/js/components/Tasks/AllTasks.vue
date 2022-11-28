@@ -15,19 +15,19 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="task in tasks" :key="task.id">
+            <tr v-for="(task, key) in tasks" :key="task.id">
                 <td>{{ task.id }}</td>
                 <td>{{ task.title}}</td>
                 <td>
-                    <div v-show = "!editDate">
-                        <label @click = "editDate = true"> {{ task.expiration_data }}</label>
+                    <div v-show = "!task.editDate">
+                        <label @click = "task.editDate = true; editDateGlobal = key"> {{ task.expiration_data }}</label>
                     </div>
-                    <input v-show = "editDate == true"
+                    <input v-show = "task.editDate == true"
                            type="date"
                            :min="task.expiration_data"
                            v-model = "task.expiration_data"
-                           v-on:blur= "editDate=false; updateTask(task.id, task.expiration_data)"
-                           @keyup.enter = "editDate=false; updateTask(task.id, task.expiration_data)">
+                           v-on:blur= "task.editDate=false; updateTask(task.id, task.expiration_data)"
+                           @keyup.enter = "task.editDate=false; updateTask(task.id, task.expiration_data)">
                 </td>
                 <td>{{ task.description }}</td>
                 <td>{{ task.state }}</td>
@@ -40,6 +40,8 @@
             </tr>
             </tbody>
         </table>
+        <span class="text-danger">{{ error }} </span>
+        <span class="text-success">{{ success }} </span>
     </div>
 </template>
 
@@ -48,22 +50,45 @@ export default {
     data() {
         return {
             tasks: [],
-            editDate: false
+            editDateGlobal: null,
+            error: '',
+            success: '',
         }
     },
     created() {
-        axios.get('/api/tasks')
-            .then(response => {
-                this.tasks = response.data;
-            });
+        this.getTasks()
+    },
+    watch: {
+        editDateGlobal: function(newVal, oldVal) {
+            if (oldVal != null) {
+                this.tasks[oldVal].editDate = false
+            }
+        }
     },
     methods: {
+        getTasks() {
+            axios.get('/api/tasks')
+                .then(response => {
+                    this.tasks = response.data;
+                });
+        },
         updateTask(task_id, date) {
             axios.patch(`/api/tasks/${task_id}`, {
                 'expiration_date' : date
             })
                 .then((res) => {
-                    console.log(res)
+                    if (res.data.status == 'error') {
+                        this.error = res.data.message
+                        this.success = ''
+                        this.tasks.forEach((task, index) => {
+                            if (task.id == task_id) {
+                                task.editDate = true
+                            }
+                        });
+                    } else {
+                        this.error = ''
+                        this.success = res.data
+                    }
                 })
         },
         deleteTask(id) {

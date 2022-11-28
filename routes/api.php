@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TasksController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,4 +26,5 @@ Route::get('logout', [LoginController::class, 'logout']);
 
 Route::middleware('api')->group(function () {
     Route::resource('tasks', TasksController::class);
+    Route::get('users/{username}', [UserController::class, 'getUserTasks']);
 });
