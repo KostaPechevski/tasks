@@ -2,7 +2,7 @@
 
 This Laravel 11 application is a small task management tool built for a technical assignment. It demonstrates clean, conventional Laravel code: Eloquent models, form requests, RESTful controllers, Blade views, and a lightweight drag-and-drop UI.
 
-![Tasks app Screenshot](screenshot.png)
+![Tasks app Screenshot](screenshots/screenshot.png)
 
 
 ### Requirements
